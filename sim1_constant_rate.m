@@ -3,12 +3,11 @@ addpath(genpath('lib'));
 
 colors = ["red"; "green"; "blue"; "cyan"];
 %%
-rtt = importdata('../results/clientQUIC-rtt0.data','\t');
-cWnd = importdata('../results/clientQUIC-cwnd-change0.data','\t');
-pacing = importdata('../results/clientQUIC-pacing-rate0.data', '\t');
-bbr_state = [0 0 0; importdata('../results/clientQUIC-BBR-state0.data','\t')];
-app_rx = importdata('../results/server-App-rx-data-1.data','\t');
-% inflight = importdata('../results/TcpVariantsComparison-inflight.data', ' ');
+rtt = importdata('../../results/1/clientQUIC-rtt0.data','\t');
+cWnd = importdata('../../results/1/clientQUIC-cwnd-change0.data','\t');
+pacing = importdata('../../results/1/clientQUIC-pacing-rate0.data', '\t');
+bbr_state = [0 0 0; importdata('../../results/1/clientQUIC-BBR-state0.data','\t')];
+rx = importdata('../../results/1/serverQUIC-rx-data1.data','\t');
 
 [~,Irtt,~] = unique(rtt(:,1),'last');
 rtt = [0, rtt(1,2) ; rtt(Irtt,[1,3])];
@@ -19,12 +18,11 @@ cWnd = [0, cWnd(1,2) ; cWnd(IcWnd,[1,3])];
 [~,Ipacing,~] = unique(pacing(:,1),'last');
 pacing = [0, pacing(1,2) ; pacing(Ipacing,[1,3])];
 
-% [~,Iinflight,~] = unique(inflight(:,1),'last');
-% inflight = inflight (Iinflight,:);
+rx = [rx(:,1), cumsum(rx(:,2))];
 
-rtt = rtt( and(rtt(:,1)>=2, rtt(:,1)<60) ,:);
-cWnd = cWnd( and(cWnd(:,1)>=2, cWnd(:,1)<60) ,:);
-pacing = pacing( and(pacing(:,1)>=2, pacing(:,1)<60) ,:);
+rtt = rtt( rtt(:,1)>=2 ,:);
+cWnd = cWnd( cWnd(:,1)>=2 ,:);
+pacing = pacing( pacing(:,1)>=2 ,:);
 
 
 
@@ -42,50 +40,33 @@ pacing = pacing( and(pacing(:,1)>=2, pacing(:,1)<60) ,:);
 % ylabel('pacing [bps]')
 % yline(2e6,'r--','Bottleneck Bandwidth');
 % xlim([0 60]);
-% 
-% %%
-% xl=zeros(3,2);
-% figure (1);
-% 
-% subplot(size(xl,1),1,1)
-% stairs(rtt(:,1),rtt(:,2),'.-');
-% yline(18e-2,':','Minimum RTT');
-% ylabel('rtt [s]');
-% ylim([0,1])
-% xl(1,:)=xlim;
-% 
-% subplot(size(xl,1),1,2)
-% stairs(cWnd(:,1),cWnd(:,2),'.-');
-% ylabel('cWnd [bytes]');
-% % set(gca, 'YScale', 'log')
-% xl(2,:)=xlim;
-% 
-% subplot(size(xl,1),1,3)
-% stairs(pacing(:,1),pacing(:,2),'.-');
-% ylabel('pacing [bps]')
-% xl(3,:)=xlim;
-% 
-% % subplot(size(xl,1),1,4)
-% % stairs(inflight(:,1),inflight(:,2),'.-');
-% % ylabel('inflight data [Bytes]')
-% % xl(4,:)=xlim;
-% 
-% xl=[min(xl(:,1)) max(xl(:,2))];
-% for k=1:3
-%     subplot(3,1,k);
-%     xlim(xl);
-%     grid on;
-% end
 
 %%
-[ax,hl] = plotyn(rtt(:,1),rtt(:,2).*1e3,...
-                 cWnd(:,1),cWnd(:,2),...
-                 pacing(:,1),pacing(:,2),...
-                 {"rtt [ms]";"cWnd [bytes]";"pacing rate [bps]"});
-             
-% for axes = ax
-%     xlim(ax, [0 60]);
-% end
+figure (1);
+
+subplot(2,2,1)
+stairs(rtt(:,1),rtt(:,2),'.-');
+yline(18e-2,':','Minimum RTT');
+ylabel('rtt [s]');
+ylim([0,1])
+xlim([0 60]);
+
+subplot(2,2,2)
+stairs(cWnd(:,1),cWnd(:,2),'.-');
+ylabel('cWnd [bytes]');
+% set(gca, 'YScale', 'log')
+xlim([0 60]);
+
+subplot(2,2,3)
+stairs(pacing(:,1),pacing(:,2),'.-');
+ylabel('pacing [bps]')
+xlim([0 60]);
+
+subplot(2,2,4)
+stairs(rx(:,1),rx(:,2),'.-');
+ylabel('received data [Bytes]')
+xlim([0 60]);
+
 
 %% colors states
 X = [repmat(bbr_state(:,1),1,2) repmat([bbr_state(2:end,1); max(rtt(:,1))],1,2)];

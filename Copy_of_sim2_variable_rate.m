@@ -3,15 +3,15 @@ addpath(genpath('lib'));
 
 colors = ["red"; "green"; "blue"; "cyan"];
 %%
-rtt = importdata('../results/clientQUIC-rtt0.data','\t');
-cWnd = importdata('../results/clientQUIC-cwnd-change0.data','\t');
-pacing = importdata('../results/clientQUIC-pacing-rate0.data', '\t');
-bbr_state = [0 0 0; importdata('../results/clientQUIC-BBR-state0.data','\t')];
+rtt = importdata('../../results/1/clientQUIC-rtt0.data','\t');
+cWnd = importdata('../../results/1/clientQUIC-cwnd-change0.data','\t');
+pacing = importdata('../../results/1/clientQUIC-pacing-rate0.data', '\t');
+bbr_state = [0 0 0; importdata('../../results/1/clientQUIC-BBR-state0.data','\t')];
 % inflight = importdata('../results/TcpVariantsComparison-inflight.data', ' ');
 
 rtt = timeseries ([rtt(1,2); rtt(:,3)],[0; rtt(:,1)],'Name','RTT');
 cWnd = timeseries ([cWnd(1,2); cWnd(:,3)],[0; cWnd(:,1)],'Name','CWND');
-pacing = timeseries ([pacing(1,2); pacing(:,3)],[0; pacing(:,1)],'Name','Pacing Rate');
+pacing = timeseries ([pacing(1,2); pacing(:,3)],[0; pacing(:,1)],'Name','Pacing Rate');ls
 
 %%
 figure;
