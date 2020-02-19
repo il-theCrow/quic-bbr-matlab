@@ -1,97 +1,41 @@
 close all; clear all; clc;
-% addpath(genpath('lib'));
 
 %%
-rtt = importdata('../results/clientQUIC-rtt0.data','\t');
-cWnd = importdata('../results/clientQUIC-cwnd-change0.data','\t');
-pacing = importdata('../results/clientQUIC-pacing-rate0.data', '\t');
-bbr_state = [0 0 0; importdata('../results/clientQUIC-BBR-state0.data','\t')];
-% inflight = importdata('../results/TcpVariantsComparison-inflight.data', ' ');
+rtt0 = importdata('../results/clientQUIC-rtt0.data','\t');
+pacing0 = importdata('../results/clientQUIC-pacing-rate0.data', '\t');
 
-[~,Irtt,~] = unique(rtt(:,1),'last');
-rtt = [0, rtt(1,2) ; rtt(Irtt,[1,3])];
+[~,Irtt,~] = unique(rtt0(:,1),'last');
+rtt0 = [0, rtt0(1,2) ; rtt0(Irtt,[1,3])];
+[~,Ipacing,~] = unique(pacing0(:,1),'last');
+pacing0 = pacing0 (Ipacing,[1 3]);
 
-[~,IcWnd,~] = unique(cWnd(:,1),'last');
-cWnd = [0, cWnd(1,2) ; cWnd(IcWnd,[1,3])];
+rtt1 = importdata('../results/clientQUIC-rtt1.data','\t');
+pacing1 = importdata('../results/clientQUIC-pacing-rate1.data', '\t');
 
-[~,Ipacing,~] = unique(pacing(:,1),'last');
-pacing = [0, pacing(1,2) ; pacing(Ipacing,[1,3])];
+[~,Irtt,~] = unique(rtt1(:,1),'last');
+rtt1 = [0, rtt1(1,2) ; rtt1(Irtt,[1,3])];
+[~,Ipacing,~] = unique(pacing1(:,1),'last');
+pacing1 = pacing1 (Ipacing,[1 3]);
 
-% [~,Iinflight,~] = unique(inflight(:,1),'last');
-% inflight = inflight (Iinflight,:);
+clear Ipacing Irtt
 
-rtt = rtt(rtt(:,1)>=2,:);
-cWnd = cWnd(cWnd(:,1)>=2,:);
-pacing = pacing(pacing(:,1)>=2,:);
-
-figure;
-hold on;
+%% increasing btl bw
+figure(1);
 yyaxis left
-plot(rtt(:,1),rtt(:,2),'.-');
-yline(180e-3,':','Minimum RTT');
-ylabel('rtt [s]')
-yyaxis right
-% stairs(cWnd(:,1),cWnd(:,2),'.-');
-% ylabel('cWnd [bytes]');
-% yyaxis right
-stairs(pacing(:,1),pacing(:,2),'.-');
-ylabel('pacing [bps]')
+stairs(rtt0(:,1),rtt0(:,2)*1e3,'b.-')
 hold on;
-plot([0 20 20 35 35 60], ([2 2 4 4 2 2])*1e6, 'm-.')
+stairs(rtt1(:,1),rtt1(:,2)*1e3,'g.-');
 hold off;
-xlim([0 60]);
+ylabel('rtt [ms]');
 
-%%
-xl=zeros(3,2);
-figure (1);
+yyaxis right
+stairs(pacing0(:,1),pacing0(:,2)*1e-6,'r.-');
+hold on;
+stairs(pacing1(:,1),pacing1(:,2)*1e-6,'m.-');
+hold off;
+ylabel('pacing rate [Mbps]');
 
-subplot(size(xl,1),1,1)
-stairs(rtt(:,1),rtt(:,2),'.-');
-yline(18e-2,':','Minimum RTT');
-ylabel('rtt [s]');
-ylim([0,1])
-xl(1,:)=xlim;
+xline(17,'k:','second flow starts');
+legend('flow 1 - rtt','flow 2 - rtt','flow 1 - pacing','flow 2 - pacing');
 
-subplot(size(xl,1),1,2)
-stairs(cWnd(:,1),cWnd(:,2),'.-');
-ylabel('cWnd [bytes]');
-% set(gca, 'YScale', 'log')
-xl(2,:)=xlim;
-
-subplot(size(xl,1),1,3)
-stairs(pacing(:,1),pacing(:,2),'.-');
-ylabel('pacing [bps]')
-xl(3,:)=xlim;
-
-% subplot(size(xl,1),1,4)
-% stairs(inflight(:,1),inflight(:,2),'.-');
-% ylabel('inflight data [Bytes]')
-% xl(4,:)=xlim;
-
-xl=[min(xl(:,1)) max(xl(:,2))];
-for k=1:3
-    subplot(3,1,k);
-    xlim(xl);
-    grid on;
-end
-
-%%
-plotyn(rtt(:,1),rtt(:,2).*1e3,...
-    cWnd(:,1),cWnd(:,2),...
-    pacing(:,1),pacing(:,2),...
-    {"rtt [ms]","cWnd [bytes]","pacing rate [bps]"});
-
-%% colors states
-X = [repmat(bbr_state(:,1),1,2) repmat([bbr_state(2:end,1); max(rtt(:,1))],1,2)];
-Y = repmat([ylim flip(ylim)],size(bbr_state,1),1);
-C = colors(bbr_state(:,3)+1);
-
-for ii=1:numel(C)
-    patch(X(ii,:),Y(ii,:),C(ii),'FaceAlpha',.25,'EdgeColor','none');
-end
-
-%%
-figure;
-stairs(pacing(:,1),pacing(:,2),'.-');
-ylabel('pacing [bps]')
-xlim([0 100]);
+xlim([15 30]);
